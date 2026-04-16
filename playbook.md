@@ -139,6 +139,29 @@ Three states determine your trading approach:
 | Overnight VP | 6:00pm → 9:30am | Overnight VH, Overnight PoC, Overnight VAL |
 | Developing FRVP | 6:00pm → now (before 9:30am) OR 9:30am → now (after 9:30am) | Dev PoC, Dev VAH, Dev VAL |
 
+### 2.3 Approved Trading Sessions (Kill Zones)
+
+The bot and manual trading are ONLY permitted during the following windows:
+
+| Session | Time (ET) | Notes |
+| :---- | :---- | :---- |
+| Asian KZ | 9:00pm – midnight | Clean, slow PA — full green |
+| London KZ | 2:00am – 5:00am | Best setups — full green |
+| NY AM | 9:30am – noon | Conditional — **news filter required** |
+| NY PM | 1:00pm – 4:00pm | Slow PA, good setups — full green |
+
+**NY AM news filter rule:**
+- Check ForexFactory for red folder USD events before every alert
+- If red folder event within 5 minutes (before OR after) → suppress alert, log "skipped — news blackout"
+- ForexFactory calendar: `forexfactory.com/calendar` (JSON feed or scrape)
+- This filter will be built as a pre-alert gate in the bot logic
+
+**Off-hours (no trading):**
+- Midnight – 2:00am ET
+- 5:00am – 9:30am ET
+- Noon – 1:00pm ET
+- After 4:00pm ET (except Asian KZ overlap at 9:00pm)
+
 ### 2.3 Developing FRVP Rules
 
 - Levels NOT trusted in first 30 minutes of session  
