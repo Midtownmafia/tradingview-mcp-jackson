@@ -4,6 +4,12 @@
 
 # Last Updated: April 13, 2026
 
+## MASTER GOAL
+
+All setups in this playbook will be coded into a single Pine Script alert indicator.
+Each setup's conditions must be written precisely enough to be translated 1:1 into Pine Script logic.
+The indicator will fire alerts when setup conditions are met, with output matching the format in Section 7.2.
+
 ---
 
 ## SECTION 1 — Core Theory: Volume Profile \+ Auction Market Theory
@@ -256,9 +262,58 @@ Look at the **last 2 completed 4H candles**:
 
 ---
 
-### SETUP 2 — \[To be added\]
+### SETUP 2 — London KZ VAH Rejection with Absorption (Bearish)
 
-*(Next setup to be documented from replay session)*
+**Type:** Mean Reversion / Failed Auction  
+**Difficulty:** Intermediate — requires patience, not a reactive entry  
+**Timeframe:** 1m execution, 5m/15m/1H confirmation  
+**Market State:** Price in premium / imbalance above VA  
+**Session:** London Kill Zone (2:00am–5:00am ET)  
+**First documented:** April 8, 2026 — MGC1! ~2:00am ET  
+
+**What makes this different from Setup 1:**
+Setup 1 is a clean liquidity grab + immediate reversal. Setup 2 has price hold ABOVE VAH for multiple bars (absorption) before rejecting. The entry is not the spike candle — it is the failed continuation after the absorption period.
+
+**Conditions for SHORT setup (VAH rejection with absorption):**
+
+1. Price spikes above MTF VAH — liquidity grab sweeps stops above the high  
+2. Price consolidates ABOVE VAH for 5–10 bars (absorption zone) — this is the key differentiator  
+3. During absorption: candle bodies shrink, wicks grow, volume tapers — exhaustion building  
+4. All 3 MTF VP TFs showing price at or above VAH (full bearish alignment)  
+5. 4H/1H bias is bearish or neutral  
+6. Session is more than 30 minutes old  
+7. Failed continuation signal: price attempts to push higher, fails, closes back below VAH  
+
+**Entry:** 1m close back below MTF VAH after failed continuation — sell the close or limit at VAH retest  
+**Stop Loss:** Above the highest wick of the absorption zone (above the spike high)  
+**TP1:** MTF POC (5m POC nearest to price)  
+**TP2:** Previous session VAH (the level price was targeting on the way down)  
+**TP3:** MTF VAL if momentum continues  
+
+**Pine Script alert logic (future indicator):**
+- Price crosses above VAH → start absorption timer  
+- If price holds above VAH for 5+ bars AND volume tapers AND candle bodies shrink → absorption confirmed  
+- If price then closes back below VAH → fire SHORT alert  
+- Cancel if price makes a new high with expanding volume (breakout, not rejection)  
+
+**Invalidation:**
+- Price breaks above absorption zone high with expanding volume = genuine breakout, exit immediately  
+- Absorption lasts more than 15 bars = value migrating higher, not a rejection  
+- Only one MTF TF showing price above VAH = not full alignment  
+
+**Confluence boosters (higher conviction):**
+- Absorption zone forms at confluence of VAH + weekly or overnight level  
+- All 3 MTF TFs aligned at VAH simultaneously  
+- Spike high matches a previous significant high (double top structure)  
+- 4H candle showing long upper wick building during absorption  
+
+**Example trade — April 8, 2026, London KZ:**
+- Spike high: ~4,868 (liquidity grab above VAH)  
+- Absorption: 7 bars held above VAH  
+- Entry: close back below VAH (~4,863)  
+- Stop: above spike high (~4,869)  
+- Target: Previous session VAH  
+- Screenshot: `screenshots/tv_undefined_2026-04-16T05-02-04-926Z.png`
 
 ### SETUP 3 — \[To be added\]
 
