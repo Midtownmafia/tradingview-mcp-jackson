@@ -148,13 +148,15 @@ The bot and manual trading are ONLY permitted during the following windows:
 | Asian KZ | 9:00pm – midnight | Clean, slow PA — full green |
 | London KZ | 2:00am – 5:00am | Best setups — full green |
 | NY AM | 9:30am – noon | Conditional — **news filter required** |
-| NY PM | 1:00pm – 4:00pm | Slow PA, good setups — full green |
+| NY PM | 1:00pm – 4:00pm | Conditional — **news filter required** (Fed speeches, FOMC, Powell) |
 
-**NY AM news filter rule:**
+**News filter rule (applies to NY AM and NY PM):**
 - Check ForexFactory for red folder USD events before every alert
-- If red folder event within 5 minutes (before OR after) → suppress alert, log "skipped — news blackout"
+- Also check for high-impact speeches (Fed Chair, FOMC minutes, CPI, NFP, PPI, etc.)
+- If red folder event OR major speech within 5 minutes (before OR after) → suppress alert, log "skipped — news blackout"
 - ForexFactory calendar: `forexfactory.com/calendar` (JSON feed or scrape)
 - This filter will be built as a pre-alert gate in the bot logic
+- Asian KZ and London KZ are exempt (US news events rarely move gold during those hours)
 
 **Off-hours (no trading):**
 - Midnight – 2:00am ET
