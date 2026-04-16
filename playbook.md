@@ -340,6 +340,49 @@ Setup 1 is a clean liquidity grab + immediate reversal. Setup 2 has price hold A
 - Target: Previous session VAH  
 - Screenshot: `screenshots/tv_undefined_2026-04-16T05-02-04-926Z.png`
 
+---
+
+### SETUP 2B — VAL Rejection with Absorption (Bullish) *(Mirror of Setup 2)*
+
+**Type:** Mean Reversion / Failed Auction  
+**Difficulty:** Intermediate  
+**Timeframe:** 1m execution, 5m/15m/1H confirmation  
+**Market State:** Price in discount / imbalance below VA  
+**Session:** Any kill zone  
+
+**Conditions for LONG setup:**
+
+1. Price spikes below MTF VAL — liquidity grab sweeps stops below the low  
+2. Price consolidates BELOW VAL for 5–10 bars (absorption zone)  
+3. During absorption: candle bodies shrink, wicks grow, volume tapers — exhaustion building  
+4. All 3 MTF VP TFs showing price at or below VAL (full bullish alignment)  
+5. 4H/1H bias is bullish or neutral  
+6. Session is more than 30 minutes old  
+7. Failed continuation signal: price attempts to push lower, fails, closes back above VAL  
+
+**Entry:** 1m close back above MTF VAL after failed continuation — buy the close or limit at VAL retest  
+**Stop Loss:** Below the lowest wick of the absorption zone (below the spike low)  
+**TP1:** MTF POC  
+**TP2:** Previous session VAL (now acting as target above)  
+**TP3:** MTF VAH if momentum continues  
+
+**Pine Script alert logic (future indicator):**
+- Price crosses below VAL → start absorption timer  
+- If price holds below VAL for 5+ bars AND volume tapers AND candle bodies shrink → absorption confirmed  
+- If price then closes back above VAL → fire LONG alert  
+- Cancel if price makes a new low with expanding volume (breakdown, not rejection)  
+
+**Invalidation:**
+- Price breaks below absorption zone low with expanding volume = genuine breakdown  
+- Absorption lasts more than 15 bars = value migrating lower  
+- Only one MTF TF showing price below VAL = not full alignment  
+
+**Confluence boosters:**
+- Absorption zone forms at confluence of VAL + weekly or overnight level  
+- All 3 MTF TFs aligned at VAL simultaneously  
+- Spike low matches a previous significant low (double bottom structure)  
+- 4H candle showing long lower wick building during absorption  
+
 ### SETUP 3 — Trending Profile Lower High Continuation (Bearish)
 
 **Type:** Trend Continuation  
@@ -405,6 +448,57 @@ Setup 1 is a clean liquidity grab + immediate reversal. Setup 2 has price hold A
 - Target: liquidity pool below (~4,835 area)  
 - Profile shape: clearly trending/skewed at time of entry  
 - Screenshot: `screenshots/tv_undefined_2026-04-16T05-43-31-521Z.png`
+
+---
+
+### SETUP 3B — Trending Profile Higher Low Continuation (Bullish) *(Mirror of Setup 3)*
+
+**Type:** Trend Continuation  
+**Difficulty:** Beginner/Intermediate  
+**Timeframe:** 1m execution, 5m/15m confirmation  
+**Market State:** Imbalance — trending profile (skewed, POC near bottom)  
+**Session:** Any approved kill zone  
+
+**How to identify a bullish trending profile:**
+- Histogram skewed/asymmetric — heavy volume at the bottom, thin volume above  
+- POC is near the BOTTOM of the profile range  
+- Price is moving up and away from the heavy volume node  
+
+**Conditions for LONG setup:**
+
+1. Volume profile showing trending/skewed shape — POC near the bottom, thin volume above  
+2. Price made a significant low (spike / liquidity grab) then bounced  
+3. Price pulls back toward the prior low zone but forms a **higher low** — fails to reach prior low  
+4. Higher low coincides with a support level (prior VAL, prior POC, or key horizontal ray)  
+5. 5m and 15m momentum is bullish — candles closing with bodies, not wicks  
+6. MTF VP showing price above VAL on at least 2 of 3 timeframes  
+7. Clear liquidity pool visible above (prior highs, VAH cluster, or key resistance level) = your target  
+
+**Entry:** 1m close above the higher low candle high — buy the breakout of the higher low structure  
+**Stop Loss:** Below the higher low wick (tight — 5-10 ticks typically)  
+**TP1:** MTF POC cluster  
+**TP2:** Liquidity pool above (prior highs / VAH cluster)  
+**TP3:** Next significant key level (Weekly/Overnight/PDaily level)  
+
+**Pine Script alert logic (future indicator):**
+- Detect trending profile: POC in bottom 30% of profile range = bullish trending shape  
+- Detect prior swing low  
+- If price pulls back to within 10 ticks of prior low BUT closes above it = higher low confirmed  
+- If higher low candle at or above identified support level = setup valid  
+- If next 1m candle closes above higher low candle high → fire LONG alert  
+- Cancel if price closes below prior swing low (structure broken to downside)  
+
+**Invalidation:**
+- Price closes below the prior swing low = trend reversing down, thesis wrong  
+- Profile begins to balance (new volume building below POC) = trending shape breaking down  
+- Higher low forms but no momentum follow-through — candles choppy and small  
+
+**Confluence boosters:**
+- Higher low forms exactly at a key horizontal ray (prior session VAL, overnight level, etc.)  
+- All 3 MTF TFs showing price above VAL (full bullish alignment)  
+- Liquidity pool target is clearly visible and well-defined above  
+- Strong momentum candles on the initial move up (confirms buyers are in control)  
+- 4H candle is bullish and showing conviction  
 
 ---
 
