@@ -197,6 +197,63 @@ export async function launch({ port, kill_existing } = {}) {
     } catch { /* ignore */ }
   }
 
+  // Windows developer-mode MSIX installation (CDP-patched via app directory)
+  // Launched via AUMID so the package context is established correctly
+  if (!tvPath && platform === 'win32') {
+    try {
+      const installLocation = execSync(
+        'powershell -NoProfile -Command "(Get-AppxPackage -Name \'TradingView*\').InstallLocation"',
+        { timeout: 5000 }
+      ).toString().trim();
+      if (installLocation) {
+        const devExe = `${installLocation}\\TradingView.exe`;
+        if (existsSync(devExe)) {
+          // Launch via AUMID so Windows establishes the package context
+          const pkgFamilyName = execSync(
+            'powershell -NoProfile -Command "(Get-AppxPackage -Name \'TradingView*\').PackageFamilyName"',
+            { timeout: 5000 }
+          ).toString().trim();
+          if (killFirst) {
+            try { execSync('taskkill /F /IM TradingView.exe', { timeout: 5000 }); } catch { /* ignore */ }
+            await new Promise(r => setTimeout(r, 1500));
+          }
+          execSync(
+            `powershell -NoProfile -Command "Start-Process 'shell:AppsFolder\\${pkgFamilyName}!TradingView.Desktop'"`,
+            { timeout: 5000 }
+          );
+          for (let i = 0; i < 15; i++) {
+            await new Promise(r => setTimeout(r, 1000));
+            try {
+              const http = await import('http');
+              const ready = await new Promise((resolve) => {
+                http.get(`http://localhost:${cdpPort}/json/version`, (res) => {
+                  let data = '';
+                  res.on('data', (chunk) => data += chunk);
+                  res.on('end', () => resolve(data));
+                }).on('error', () => resolve(null));
+              });
+              if (ready) {
+                const info = JSON.parse(ready);
+                return {
+                  success: true, platform, binary: devExe, cdp_port: cdpPort,
+                  cdp_url: `http://localhost:${cdpPort}`,
+                  browser: info.Browser, user_agent: info['User-Agent'],
+                  note: 'Launched via developer-mode MSIX AUMID with CDP patch',
+                };
+              }
+            } catch { /* retry */ }
+          }
+          return {
+            success: true, platform, binary: devExe, cdp_port: cdpPort, cdp_ready: false,
+            warning: 'TradingView launched but CDP not responding yet. Try tv_health_check in a few seconds.',
+          };
+        }
+      }
+    } catch (e) {
+      /* ignore detection errors */
+    }
+  }
+
   if (!tvPath && platform === 'darwin') {
     try {
       const found = execSync('mdfind "kMDItemFSName == TradingView.app" | head -1', { timeout: 5000 }).toString().trim();

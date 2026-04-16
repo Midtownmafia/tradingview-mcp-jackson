@@ -27,6 +27,7 @@ import "./commands/tab.js";
 import "./commands/stream.js";
 import "./commands/morning.js";
 import "./commands/volprofile.js";
+import "./commands/alignment.js";
 
 // Run
 import { run } from "./router.js";
