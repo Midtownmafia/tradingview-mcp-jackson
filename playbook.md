@@ -315,9 +315,71 @@ Setup 1 is a clean liquidity grab + immediate reversal. Setup 2 has price hold A
 - Target: Previous session VAH  
 - Screenshot: `screenshots/tv_undefined_2026-04-16T05-02-04-926Z.png`
 
-### SETUP 3 — \[To be added\]
+### SETUP 3 — Trending Profile Lower High Continuation (Bearish)
 
-*(Next setup to be documented from replay session)*
+**Type:** Trend Continuation  
+**Difficulty:** Beginner/Intermediate — cleaner entry, tighter stop, trend is your friend  
+**Timeframe:** 1m execution, 5m/15m confirmation  
+**Market State:** Imbalance — trending profile (skewed, not bell curve)  
+**Session:** London Kill Zone (2:00am–5:00am ET) or any session with clear trend  
+**First documented:** April 8, 2026 — MGC1! ~3:30am ET  
+
+**Why this is safer than Setup 1 and 2:**
+- You are NOT counter-trading — you are joining an established trend
+- The stop is tight and well-defined (just above the lower high)
+- The profile shape itself confirms the bias — trending profiles signal continuation, not reversal
+- No waiting through absorption or timing a spike reversal
+
+**How to identify a trending profile:**
+- Volume profile histogram is skewed/asymmetric — heavy volume at one end, thin at the other
+- NOT a balanced bell curve (that is a balanced/rotational market)
+- POC is near the top of the profile (bearish) or near the bottom (bullish)
+- Price is moving away from the heavy volume node, not rotating back to it
+
+**Conditions for SHORT setup:**
+
+1. Volume profile showing trending/skewed shape — POC near the top, thin volume below  
+2. Price made a significant high (spike / liquidity grab) then pulled back  
+3. Price rallies to retest the prior high zone but forms a **lower high** — fails to reach prior high  
+4. Lower high coincides with a resistance level (prior VAH, prior POC, or key horizontal ray)  
+5. 5m and 15m momentum is bearish — candles closing with bodies, not wicks  
+6. MTF VP showing price below VAH on at least 2 of 3 timeframes  
+7. Clear liquidity pool visible below (prior lows, VAL cluster, or key support level) = your target  
+
+**Entry:** 1m close below the lower high candle low — sell the breakdown of the lower high structure  
+**Stop Loss:** Above the lower high wick (tight — 5-10 ticks typically)  
+**TP1:** MTF POC cluster  
+**TP2:** Liquidity pool below (prior lows / VAL cluster)  
+**TP3:** Next significant key level (Weekly/Overnight/PDaily level)  
+
+**Pine Script alert logic (future indicator):**
+- Detect trending profile: POC in top 30% of profile range = bearish trending shape  
+- Detect prior swing high  
+- If price rallies to within 10 ticks of prior high BUT closes below it = lower high confirmed  
+- If lower high candle at or below identified resistance level = setup valid  
+- If next 1m candle closes below lower high candle low → fire SHORT alert  
+- Cancel if price closes above prior swing high (structure broken to upside)  
+
+**Invalidation:**
+- Price closes above the prior swing high = trend resuming upward, thesis wrong  
+- Profile begins to balance (new volume building above POC) = trending shape breaking down  
+- Lower high forms but no momentum follow-through — candles choppy and small  
+
+**Confluence boosters (higher conviction):**
+- Lower high forms exactly at a key horizontal ray (prior session VAH, overnight level, etc.)  
+- All 3 MTF TFs showing price below VAH (full bearish alignment)  
+- Liquidity pool target is clearly visible and well-defined below  
+- Strong momentum candles on the initial move down (confirms sellers are in control)  
+- 4H candle is bearish and showing conviction  
+
+**Example trade — April 8, 2026, London KZ ~3:30am ET:**
+- Initial spike high: ~4,868 (~2:00am)  
+- Lower high: ~4,862 (resistance — prior VAH zone)  
+- Entry: break below lower high structure  
+- Stop: above lower high wick (~5-8 ticks)  
+- Target: liquidity pool below (~4,835 area)  
+- Profile shape: clearly trending/skewed at time of entry  
+- Screenshot: `screenshots/tv_undefined_2026-04-16T05-43-31-521Z.png`
 
 ---
 
