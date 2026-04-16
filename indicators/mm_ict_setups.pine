@@ -1,0 +1,310 @@
+//@version=6
+indicator("MM ICT Setups", overlay=true, max_boxes_count=200, max_labels_count=100, max_lines_count=50)
+
+// ════════════════════════════════════════════════════════════════════════════
+//  MM ICT SETUPS  —  Silver Bullet + Unicorn + MTF VP Alignment
+// ════════════════════════════════════════════════════════════════════════════
+
+string TZ = "America/New_York"
+
+// ─── Silver Bullet Inputs ─────────────────────────────────────────────────────
+bool sb_on     = input.bool(true, "━━ Silver Bullet ON",       group="Silver Bullet")
+bool kz_london = input.bool(true, "London KZ (3–4am ET)",      group="Silver Bullet")
+bool kz_ny_am  = input.bool(true, "NY AM KZ  (10–11am ET)",    group="Silver Bullet")
+bool kz_ny_pm  = input.bool(true, "NY PM KZ  (2–3pm ET)",      group="Silver Bullet")
+bool sb_boxes  = input.bool(true, "Show FVG Boxes",            group="Silver Bullet")
+
+// ─── Unicorn Inputs ───────────────────────────────────────────────────────────
+bool uni_on    = input.bool(true, "━━ Unicorn ON",             group="Unicorn")
+int  swing_len = input.int(5,     "Swing Lookback",             group="Unicorn", minval=2, maxval=20)
+bool show_ob   = input.bool(true, "Show Order Blocks",          group="Unicorn")
+bool show_ufvg = input.bool(true, "Show Unicorn FVG Zones",    group="Unicorn")
+
+// ─── MTF VP Alignment Inputs ──────────────────────────────────────────────────
+bool mtf_on    = input.bool(true, "━━ MTF VP Alignment ON",   group="MTF VP Alignment")
+string tf1     = input.timeframe("5",  "TF 1 (fast)",          group="MTF VP Alignment")
+string tf2     = input.timeframe("15", "TF 2 (mid)",            group="MTF VP Alignment")
+string tf3     = input.timeframe("60", "TF 3 (slow)",           group="MTF VP Alignment")
+float  va_mult = input.float(1.0,  "VA Width (stdev mult)",     group="MTF VP Alignment", step=0.1)
+bool   va_lines = input.bool(true, "Show VA Lines",             group="MTF VP Alignment")
+
+// ════════════════════════════════════════════════════════════════════════════
+//  SILVER BULLET
+// ════════════════════════════════════════════════════════════════════════════
+
+int hh = hour(time, TZ)
+int hm = hh * 100 + minute(time, TZ)
+
+bool in_london = kz_london and (hm >= 300  and hm < 400)
+bool in_ny_am  = kz_ny_am  and (hm >= 1000 and hm < 1100)
+bool in_ny_pm  = kz_ny_pm  and (hm >= 1400 and hm < 1500)
+bool in_kz     = in_london or in_ny_am or in_ny_pm
+
+bool sb_bull_fvg = low > high[2]
+bool sb_bear_fvg = high < low[2]
+
+// Armed = FVG formed in KZ, waiting for ONE retest. Fires once then disarms.
+var float sb_bull_top    = na
+var float sb_bull_bot    = na
+var float sb_bear_top    = na
+var float sb_bear_bot    = na
+var bool  sb_bull_armed  = false
+var bool  sb_bear_armed  = false
+var int   sb_bull_since  = 0    // bars since armed
+var int   sb_bear_since  = 0
+
+// Arm on FVG formation inside kill zone (only if not already armed — one setup at a time)
+if sb_on and sb_bull_fvg and in_kz and not sb_bull_armed
+    sb_bull_top   := low
+    sb_bull_bot   := high[2]
+    sb_bull_armed := true
+    sb_bull_since := 0
+    if sb_boxes
+        box.new(bar_index - 2, sb_bull_top, bar_index + 20, sb_bull_bot,
+            border_color=color.new(color.lime, 60), bgcolor=color.new(color.lime, 88))
+
+if sb_on and sb_bear_fvg and in_kz and not sb_bear_armed
+    sb_bear_top   := low[2]
+    sb_bear_bot   := high
+    sb_bear_armed := true
+    sb_bear_since := 0
+    if sb_boxes
+        box.new(bar_index - 2, sb_bear_top, bar_index + 20, sb_bear_bot,
+            border_color=color.new(color.red, 60), bgcolor=color.new(color.red, 88))
+
+// Count bars since armed
+if sb_bull_armed
+    sb_bull_since += 1
+if sb_bear_armed
+    sb_bear_since += 1
+
+// Invalidate if price closes through the FVG (structure broken)
+if sb_bull_armed and close < sb_bull_bot
+    sb_bull_armed := false
+
+if sb_bear_armed and close > sb_bear_top
+    sb_bear_armed := false
+
+// Invalidate if kill zone ends without a retest
+if sb_bull_armed and not in_kz and sb_bull_since > 1
+    sb_bull_armed := false
+
+if sb_bear_armed and not in_kz and sb_bear_since > 1
+    sb_bear_armed := false
+
+// Entry: fires ONCE — price was outside FVG, then enters it with a directional close
+bool sb_long  = false
+bool sb_short = false
+
+if sb_on and sb_bull_armed and sb_bull_since >= 2 and not na(sb_bull_top)
+    bool was_above = close[1] > sb_bull_top      // price was above FVG last bar
+    bool in_fvg    = low <= sb_bull_top and close >= sb_bull_bot
+    if was_above and in_fvg
+        sb_long       := true
+        sb_bull_armed := false
+
+if sb_on and sb_bear_armed and sb_bear_since >= 2 and not na(sb_bear_top)
+    bool was_below = close[1] < sb_bear_bot      // price was below FVG last bar
+    bool in_fvg    = high >= sb_bear_bot and close <= sb_bear_top
+    if was_below and in_fvg
+        sb_short      := true
+        sb_bear_armed := false
+
+plotshape(sb_long,  title="SB Long",  style=shape.labelup,   location=location.belowbar,
+    color=color.new(color.lime, 0), textcolor=color.black, text="SB", size=size.small)
+plotshape(sb_short, title="SB Short", style=shape.labeldown, location=location.abovebar,
+    color=color.new(color.red,  0), textcolor=color.white, text="SB", size=size.small)
+
+bgcolor(in_london ? color.new(color.blue,   93) :
+        in_ny_am  ? color.new(color.yellow, 93) :
+        in_ny_pm  ? color.new(color.orange, 93) : na,
+        title="Kill Zone BG")
+
+// ════════════════════════════════════════════════════════════════════════════
+//  UNICORN
+// ════════════════════════════════════════════════════════════════════════════
+
+float swing_hi = ta.pivothigh(high, swing_len, swing_len)
+float swing_lo = ta.pivotlow(low,  swing_len, swing_len)
+
+var float last_shi = na
+var float last_slo = na
+if not na(swing_hi)
+    last_shi := swing_hi
+if not na(swing_lo)
+    last_slo := swing_lo
+
+bool cross_up = not na(last_shi) and close > last_shi and close[1] <= last_shi
+bool cross_dn = not na(last_slo) and close < last_slo and close[1] >= last_slo
+bool bull_mss = uni_on and cross_up
+bool bear_mss = uni_on and cross_dn
+
+var bool had_bull_mss = false
+var bool had_bear_mss = false
+if bull_mss
+    had_bull_mss := true
+    had_bear_mss := false
+if bear_mss
+    had_bear_mss := true
+    had_bull_mss := false
+
+// ─── Order Block ─────────────────────────────────────────────────────────────
+var float bull_ob_hi  = na
+var float bull_ob_lo  = na
+var float bear_ob_hi  = na
+var float bear_ob_lo  = na
+var int   bull_ob_bar = na
+var int   bear_ob_bar = na
+
+if bull_mss
+    for i = 1 to 10
+        if close[i] < open[i]
+            bull_ob_hi  := high[i]
+            bull_ob_lo  := low[i]
+            bull_ob_bar := bar_index - i
+            break
+    if show_ob and not na(bull_ob_hi)
+        box.new(bull_ob_bar, bull_ob_hi, bar_index + 30, bull_ob_lo,
+            border_color=color.new(color.teal, 40), bgcolor=color.new(color.teal, 85))
+
+if bear_mss
+    for i = 1 to 10
+        if close[i] > open[i]
+            bear_ob_hi  := high[i]
+            bear_ob_lo  := low[i]
+            bear_ob_bar := bar_index - i
+            break
+    if show_ob and not na(bear_ob_hi)
+        box.new(bear_ob_bar, bear_ob_hi, bar_index + 30, bear_ob_lo,
+            border_color=color.new(color.orange, 40), bgcolor=color.new(color.orange, 85))
+
+// ─── Unicorn Confluence: FVG overlapping OB ───────────────────────────────────
+// Armed = confluence found, waiting for ONE retest entry. Fires once then disarms.
+var bool bull_uni_armed = false
+var bool bear_uni_armed = false
+var int  bull_uni_since = 0    // bars since armed (prevent same-bar entry)
+var int  bear_uni_since = 0
+
+bool is_bull_fvg = low > high[2]
+bool is_bear_fvg = high < low[2]
+
+// Arm on first FVG inside OB after MSS (ignore subsequent FVGs in same setup)
+if is_bull_fvg and not na(bull_ob_hi) and had_bull_mss and not bull_uni_armed
+    float ft = low
+    float fb = high[2]
+    if ft >= bull_ob_lo and fb <= bull_ob_hi
+        bull_uni_armed := true
+        bull_uni_since := 0
+        if show_ufvg
+            box.new(bar_index - 2, ft, bar_index + 20, fb,
+                border_color=color.new(color.lime, 30), bgcolor=color.new(color.lime, 80))
+
+if is_bear_fvg and not na(bear_ob_lo) and had_bear_mss and not bear_uni_armed
+    float ft = low[2]
+    float fb = high
+    if ft >= bear_ob_lo and fb <= bear_ob_hi
+        bear_uni_armed := true
+        bear_uni_since := 0
+        if show_ufvg
+            box.new(bar_index - 2, ft, bar_index + 20, fb,
+                border_color=color.new(color.red, 30), bgcolor=color.new(color.red, 80))
+
+// Count bars since armed
+if bull_uni_armed
+    bull_uni_since += 1
+if bear_uni_armed
+    bear_uni_since += 1
+
+// Invalidate if price closes BEYOND the OB (structure violated)
+if bull_uni_armed and close < bull_ob_lo
+    bull_uni_armed := false
+    had_bull_mss   := false
+
+if bear_uni_armed and close > bear_ob_hi
+    bear_uni_armed := false
+    had_bear_mss   := false
+
+// ─── Entry: fires ONCE on first OB retest, then disarms ──────────────────────
+// Require at least 2 bars since armed (true retest, not same-bar)
+// Require price ENTERS OB from outside: previous bar close was outside OB
+bool uni_long  = false
+bool uni_short = false
+
+if uni_on and bull_uni_armed and bull_uni_since >= 2 and not na(bull_ob_hi)
+    bool was_above = close[1] > bull_ob_hi   // price was above OB last bar
+    bool in_ob     = low <= bull_ob_hi and close >= bull_ob_lo
+    if was_above and in_ob
+        uni_long       := true
+        bull_uni_armed := false
+        had_bull_mss   := false
+
+if uni_on and bear_uni_armed and bear_uni_since >= 2 and not na(bear_ob_lo)
+    bool was_below = close[1] < bear_ob_lo   // price was below OB last bar
+    bool in_ob     = high >= bear_ob_lo and close <= bear_ob_hi
+    if was_below and in_ob
+        uni_short      := true
+        bear_uni_armed := false
+        had_bear_mss   := false
+
+plotshape(bull_mss, title="Bull MSS", style=shape.triangleup,   location=location.belowbar,
+    color=color.new(color.teal, 20), size=size.tiny)
+plotshape(bear_mss, title="Bear MSS", style=shape.triangledown, location=location.abovebar,
+    color=color.new(color.orange, 20), size=size.tiny)
+
+plotshape(uni_long,  title="Unicorn Long",  style=shape.diamond, location=location.belowbar,
+    color=color.new(color.lime, 0), size=size.normal)
+plotshape(uni_short, title="Unicorn Short", style=shape.diamond, location=location.abovebar,
+    color=color.new(color.red,  0), size=size.normal)
+
+// ════════════════════════════════════════════════════════════════════════════
+//  MTF VP ALIGNMENT
+// ════════════════════════════════════════════════════════════════════════════
+
+[poc1, sp1] = request.security(syminfo.tickerid, tf1, [ta.vwap, ta.stdev(hlc3, 50)], lookahead=barmerge.lookahead_off)
+[poc2, sp2] = request.security(syminfo.tickerid, tf2, [ta.vwap, ta.stdev(hlc3, 50)], lookahead=barmerge.lookahead_off)
+[poc3, sp3] = request.security(syminfo.tickerid, tf3, [ta.vwap, ta.stdev(hlc3, 50)], lookahead=barmerge.lookahead_off)
+
+float vah1 = poc1 + sp1 * va_mult
+float val1 = poc1 - sp1 * va_mult
+float vah2 = poc2 + sp2 * va_mult
+float val2 = poc2 - sp2 * va_mult
+float vah3 = poc3 + sp3 * va_mult
+float val3 = poc3 - sp3 * va_mult
+
+bool bull_align = mtf_on and close > vah1 and close > vah2 and close > vah3
+bool bear_align = mtf_on and close < val1 and close < val2 and close < val3
+
+bool bull_trigger = bull_align and not bull_align[1]
+bool bear_trigger = bear_align and not bear_align[1]
+
+plotshape(bull_trigger, title="MTF Bull Align ▲", style=shape.triangleup,   location=location.belowbar,
+    color=color.lime, size=size.large)
+plotshape(bear_trigger, title="MTF Bear Align ▼", style=shape.triangledown, location=location.abovebar,
+    color=color.red,  size=size.large)
+
+bgcolor(bull_align ? color.new(color.lime, 92) : bear_align ? color.new(color.red, 92) : na, title="MTF Align BG")
+
+plot(va_lines ? vah1 : na, "5m VAH",  color.new(color.teal,   40), 1, plot.style_circles)
+plot(va_lines ? val1 : na, "5m VAL",  color.new(color.teal,   40), 1, plot.style_circles)
+plot(va_lines ? vah2 : na, "15m VAH", color.new(color.orange, 40), 1, plot.style_circles)
+plot(va_lines ? val2 : na, "15m VAL", color.new(color.orange, 40), 1, plot.style_circles)
+plot(va_lines ? vah3 : na, "1H VAH",  color.new(color.purple, 40), 1, plot.style_circles)
+plot(va_lines ? val3 : na, "1H VAL",  color.new(color.purple, 40), 1, plot.style_circles)
+
+if barstate.islast and mtf_on
+    string st = bull_align ? "BULL ALIGN" : bear_align ? "BEAR ALIGN" : "neutral"
+    color col = bull_align ? color.lime : bear_align ? color.red : color.gray
+    label.new(bar_index + 2, close, st, style=label.style_label_left, color=col, textcolor=color.white, size=size.normal)
+
+// ════════════════════════════════════════════════════════════════════════════
+//  ALERTS
+// ════════════════════════════════════════════════════════════════════════════
+
+alertcondition(sb_long,       title="SB Long",         message="MM Silver Bullet LONG: FVG retest in kill zone.")
+alertcondition(sb_short,      title="SB Short",        message="MM Silver Bullet SHORT: FVG retest in kill zone.")
+alertcondition(bull_mss,      title="Bull MSS",        message="MM Unicorn: Bullish MSS detected.")
+alertcondition(bear_mss,      title="Bear MSS",        message="MM Unicorn: Bearish MSS detected.")
+alertcondition(uni_long,      title="Unicorn Long",    message="MM Unicorn LONG ENTRY: OB retest after FVG confluence.")
+alertcondition(uni_short,     title="Unicorn Short",   message="MM Unicorn SHORT ENTRY: OB retest after FVG confluence.")
+alertcondition(bull_trigger,  title="MTF Bull Align",  message="MM MTF VP ALIGNMENT BULLISH: price above VAH on all TFs.")
+alertcondition(bear_trigger,  title="MTF Bear Align",  message="MM MTF VP ALIGNMENT BEARISH: price below VAL on all TFs.")
