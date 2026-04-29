@@ -70,7 +70,7 @@ do {
     Start-Sleep -Seconds 2
     $elapsed += 2
     try {
-        Invoke-WebRequest -Uri "http://localhost:$Port/json/version" -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop | Out-Null
+        Invoke-WebRequest -Uri "http://127.0.0.1:$Port/json/version" -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop | Out-Null
         Write-Host "CDP ready! TradingView is running with debug port $Port."
         exit 0
     } catch {
