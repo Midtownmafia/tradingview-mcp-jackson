@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { z } from 'zod';
 import { jsonResult } from './_format.js';
 import * as core from '../core/pine.js';
@@ -13,6 +14,18 @@ export function registerPineTools(server) {
   }, async ({ source }) => {
     try { return jsonResult(await core.setSource({ source })); }
     catch (err) { return jsonResult({ success: false, error: err.message }, true); }
+  });
+
+  server.tool('pine_set_source_from_file', 'Set Pine Script source code in the editor by reading from a local file path. Use this for any Pine source larger than ~10KB — bypasses the assistant\'s tool-call output budget that pine_set_source\'s inline string parameter is constrained by.', {
+    path: z.string().describe('Absolute path to the Pine source file (e.g. .pine extension; UTF-8 expected)'),
+  }, async ({ path }) => {
+    try {
+      const source = await readFile(path, 'utf-8');
+      const result = await core.setSource({ source });
+      return jsonResult({ ...result, path, bytes: source.length });
+    } catch (err) {
+      return jsonResult({ success: false, path, error: err.message }, true);
+    }
   });
 
   server.tool('pine_compile', 'Compile / add the current Pine Script to the chart', {}, async () => {

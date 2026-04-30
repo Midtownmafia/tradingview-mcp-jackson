@@ -42,14 +42,15 @@ Use `study_filter` parameter to target a specific indicator by name substring (e
 - `chart_set_visible_range` → zoom to exact date range (unix timestamps)
 
 ### "Work on Pine Script"
-1. `pine_set_source` → inject code into editor
-2. `pine_smart_compile` → compile with auto-detection + error check
-3. `pine_get_errors` → read compilation errors
-4. `pine_get_console` → read log.info() output
-5. `pine_get_source` → read current code back (WARNING: can be very large for complex scripts)
-6. `pine_save` → save to TradingView cloud
-7. `pine_new` → create blank indicator/strategy/library
-8. `pine_open` → load a saved script by name
+1. `pine_set_source` → inject code into editor (inline string; use only for sources < ~10KB)
+2. `pine_set_source_from_file` → inject from local file path; **use this for any Pine source > ~10KB** — bypasses the assistant's tool-call output budget that the inline `pine_set_source` parameter is constrained by. Required for full SVP/CVD-class indicators (60K+ chars)
+3. `pine_smart_compile` → compile with auto-detection + error check (also saves + updates the chart instance in place when the script is bound to it)
+4. `pine_get_errors` → read compilation errors
+5. `pine_get_console` → read log.info() output
+6. `pine_get_source` → read current code back (WARNING: can be very large for complex scripts)
+7. `pine_save` → save to TradingView cloud
+8. `pine_new` → create blank indicator/strategy/library
+9. `pine_open` → load a saved script by name
 
 ### "Practice trading with replay"
 1. `replay_start` with `date: "2025-03-01"` → enter replay mode
